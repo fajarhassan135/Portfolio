@@ -93,7 +93,6 @@ const REFLECT_OPACITY = 0.22;
 
 /* ---- palette: unchanged ---- */
 const RIBBON_DARK = 0x150c18;
-const RIBBON_EDGE = 0x2b1a30; // the hairline seam drawn at each cell boundary
 const GOLD = 0xd8ad5c;
 
 /** three.js colours are numbers; the 2D canvas wants CSS. One place to convert. */

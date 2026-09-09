@@ -26,11 +26,10 @@ type Props = {
   onOpenPanel: (data: StationData) => void;
   onReady?: () => void;
   panelOpen?: boolean;
-  dense?: boolean; // "play" mode gets a few extra stations
   onExit?: () => void;
 };
 
-export default function Scene({ onOpenPanel, onReady, panelOpen = false, dense = false, onExit }: Props) {
+export default function Scene({ onOpenPanel, onReady, panelOpen = false, onExit }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const presetTriggerRef = useRef<(preset: PresetName) => void>(() => {});
   const unfocusTriggerRef = useRef<() => void>(() => {});
@@ -138,13 +137,6 @@ export default function Scene({ onOpenPanel, onReady, panelOpen = false, dense =
     }
     function addRoundedBlock(w: number, h: number, d: number, color: number, opts?: { roughness?: number; metalness?: number; emissive?: number; emissiveIntensity?: number }, radius = 0.035) {
       return addSolid(new RoundedBoxGeometry(w, h, d, 2, radius), color, opts);
-    }
-    // capsule's straight length is (len - 2*r); pass the desired total tip-to-tip length
-    function addCapsule(radius: number, length: number, color: number, opts?: { roughness?: number; metalness?: number; emissive?: number; emissiveIntensity?: number }) {
-      return addSolid(new THREE.CapsuleGeometry(radius, Math.max(0.001, length - radius * 2), 6, 12), color, opts);
-    }
-    function addSphere(radius: number, color: number, opts?: { roughness?: number; metalness?: number; emissive?: number; emissiveIntensity?: number }) {
-      return addSolid(new THREE.SphereGeometry(radius, 16, 12), color, opts);
     }
 
     // ================= ROOM =================
@@ -646,27 +638,6 @@ export default function Scene({ onOpenPanel, onReady, panelOpen = false, dense =
     scene.add(popcornStand);
     stations.push(popcornStand);
 
-    if (dense) {
-      const projGroup = new THREE.Group();
-      const boothFace = addBlock(1.2, 0.9, 0.15, cBoothWoodDark, { roughness: 0.6 });
-      projGroup.add(boothFace);
-      const projWindow = new THREE.Mesh(
-        new THREE.PlaneGeometry(0.7, 0.4),
-        new THREE.MeshStandardMaterial({ color: cAmber, emissive: cAmber, emissiveIntensity: 1.0 })
-      );
-      projWindow.position.z = 0.08;
-      projGroup.add(projWindow);
-      projGroup.position.set(0, 5.6, ROOM_HALF - 0.4);
-      projGroup.rotation.y = Math.PI;
-      projGroup.userData = {
-        name: "extra",
-        eyebrow: "PROJECTION BOOTH",
-        title: "???",
-        body: "Placeholder — hidden extra / easter egg content.",
-      };
-      scene.add(projGroup);
-      stations.push(projGroup);
-    }
 
     // ================= ENTRANCE / EXIT DOORS — decorative, mounted on the room walls =================
     function makeSignPlane(text: string, color: string, w: number, h: number, glow: number) {
@@ -961,9 +932,6 @@ export default function Scene({ onOpenPanel, onReady, panelOpen = false, dense =
     // makeGuyCharacter() is available here too for any interior NPC
     const player = makeGirlCharacter();
     const character = player.root;
-    const hip = player.hip;
-    const torsoGroup = player.torsoGroup;
-    const headGroup = player.headGroup;
     const legL = player.legL;
     const legR = player.legR;
     const armL = player.armL;
@@ -1831,7 +1799,7 @@ export default function Scene({ onOpenPanel, onReady, panelOpen = false, dense =
       window.removeEventListener("resize", onResize);
       renderer.dispose();
     };
-  }, [dense, onOpenPanel, onReady, onExit]);
+  }, [onOpenPanel, onReady, onExit]);
 
   return (
     <>

@@ -43,7 +43,13 @@ export type ScreenRect = { x: number; y: number; w: number; h: number };
 export default function ProjectsHall({ onScreenRect }: { onScreenRect: (r: ScreenRect | null) => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rectRef = useRef(onScreenRect);
-  rectRef.current = onScreenRect;
+
+  /* Kept current in an effect, not during render. Writing to a ref while rendering is a side effect:
+     React may discard a render, and the ref would keep the value from the render that never happened.
+     No dependency array, so it re-syncs after every commit. */
+  useEffect(() => {
+    rectRef.current = onScreenRect;
+  });
 
   useEffect(() => {
     const canvas = canvasRef.current;

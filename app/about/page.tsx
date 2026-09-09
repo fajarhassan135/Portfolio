@@ -25,7 +25,7 @@ const CONTENT = {
   // sits under the name and the photo, at the very top of the page
   intro: [
     "I build things that work, and sometimes things that shouldn't. Full-stack development is the day job and LLM work is the part I keep pulling on: AI powered tools, automated chatbots, and the plumbing that connects them to something a real person can actually use.",
-    "Right now I'm in my 5th semester of BS Software Engineering at the University of Faisalabad and interning at CodeCelix, after a stint at DeveloperHub and a first shipped client site along the way. Most of what I know came from building the thing before I knew how to build it.",
+    "Right now I'm in my 5th semester of BS Software Engineering at the University of Faisalabad, after ten years at Divisional Model School and College and a first shipped client site along the way. Most of what I know came from building the thing before I knew how to build it.",
     "The cinema this site is wrapped in isn't decoration. Film is the reason I started writing code at all, and the two have never really separated since.",
   ],
 
@@ -34,7 +34,7 @@ const CONTENT = {
     { label: "Role", value: "Full-stack developer and AI engineer" },
     { label: "Focus", value: "LLM integration, AI chatbots, web apps" },
     { label: "Studying", value: "BS Software Engineering, University of Faisalabad" },
-    { label: "Status", value: "Interning at CodeCelix" },
+    { label: "Based", value: "Faisalabad, Pakistan" },
   ],
 
   portrait: "/me.jpg" as string | null,
@@ -83,8 +83,8 @@ const CONTENT = {
       what: "First personal project: a movie discovery and review website",
       where: "The seed of Kinema",
     },
-    { when: "2012 to 2022", what: "School", where: "" },
-    { when: "2022 to 2024", what: "College", where: "" },
+    { when: "2012 to 2022", what: "School", where: "Divisional Model School and College" },
+    { when: "2022 to 2024", what: "College", where: "Divisional Model School and College" },
     {
       when: "2024 to 2028",
       what: "BS Software Engineering, currently 5th semester",
@@ -95,8 +95,8 @@ const CONTENT = {
       what: "First shipped client project: website for NA Threads Manufacturing Company",
       where: "",
     },
-    { when: "2026", what: "Internship", where: "DeveloperHub" },
-    { when: "2026 to present", what: "Internship", where: "CodeCelix" },
+    { when: "2026", what: "Internship, completed", where: "DeveloperHub" },
+    { when: "2026", what: "Internship, completed", where: "CodeCelix" },
   ],
 
   // Contact details deliberately do not live here. Email, GitHub and LinkedIn belong on the
@@ -142,23 +142,48 @@ function useScrollBlur() {
     const els = Array.from(document.querySelectorAll<HTMLElement>(".blur-section"));
     let ticking = false;
 
-    // Blur only once a section is genuinely done with. `progress` is how far the section has been
-    // scrolled through: 0 when its top reaches the top of the viewport, 1 when its bottom does.
-    // Nothing happens until BLUR_START, so a section stays perfectly sharp the whole time it is
-    // being read, and sections below the fold are never touched — that pre-blur was what made the
-    // page look hazy before you had scrolled at all.
-    const BLUR_START = 0.9;
+    /* How far a card has been scrolled past, measured in DOCUMENT space rather than from its
+       bounding rect. The rect is the wrong ruler here: the cards overlap each other by a negative
+       margin and are transformed as they recede, so the rect reports a position that the transform
+       itself has already moved. offsetTop is the position in flow, which nothing here changes.
+
+       RECEDE_START is the fraction of a card that has to pass before it starts sinking. It begins
+       well before the card is gone, because the point is to see it settle underneath the next one
+       while that one arrives, which is what makes it read as stacking rather than as scrolling. */
+    const RECEDE_START = 0.45;
+
+    /* True document position, walked up the offsetParent chain. `el.offsetTop` alone is measured
+       from the nearest POSITIONED ancestor, and these cards are position: relative inside a
+       positioned wrapper, so on its own it returned a small number and every card read as already
+       scrolled past: they all rendered dimmed and shrunk before the page had moved at all.
+
+       offsetTop is also the right ruler rather than getBoundingClientRect, because the rect includes
+       the recede transform this function is itself applying, which would feed back on itself. */
+    const docTop = (el: HTMLElement) => {
+      let y = 0;
+      let n: HTMLElement | null = el;
+      while (n) {
+        y += n.offsetTop;
+        n = n.offsetParent as HTMLElement | null;
+      }
+      return y;
+    };
+
+    let tops = els.map(docTop);
 
     const apply = () => {
       ticking = false;
-      for (const el of els) {
-        const r = el.getBoundingClientRect();
-        const h = Math.max(1, r.height);
-        const progress = Math.max(0, -r.top / h);
-        const t = Math.min(1, Math.max(0, (progress - BLUR_START) / (1 - BLUR_START)));
-        el.style.setProperty("--sec-blur", `${(t * 7).toFixed(2)}px`);
-        el.style.setProperty("--sec-opacity", `${(1 - t * 0.62).toFixed(3)}`);
-        el.style.setProperty("--sec-scale", `${(1 - t * 0.022).toFixed(4)}`);
+      const y = window.scrollY;
+      for (let i = 0; i < els.length; i++) {
+        const el = els[i];
+        const h = Math.max(1, el.offsetHeight);
+        const passed = (y - tops[i]) / h;
+        const t = Math.min(1, Math.max(0, (passed - RECEDE_START) / (1 - RECEDE_START)));
+        // eased, so the card slows as it settles instead of sliding linearly under the next
+        const e = t * t * (3 - 2 * t);
+        el.style.setProperty("--sec-opacity", (1 - e * 0.55).toFixed(3));
+        el.style.setProperty("--sec-scale", (1 - e * 0.055).toFixed(4));
+        el.style.setProperty("--sec-lift", `${(e * -26).toFixed(1)}px`);
       }
     };
 
@@ -167,13 +192,18 @@ function useScrollBlur() {
       ticking = true;
       requestAnimationFrame(apply);
     };
+    // the cards change height when the layout reflows, so the cached tops have to be rebuilt
+    const onResize = () => {
+      tops = els.map(docTop);
+      onScroll();
+    };
 
     apply();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    window.addEventListener("resize", onResize);
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("resize", onResize);
     };
   }, []);
 }
@@ -561,8 +591,9 @@ export default function About() {
               <div style={{ display: "flex", flexDirection: "column", gap: 20, maxWidth: 660 }}>
                 <Reveal delay={140}>
                   <p style={{ fontSize: 16.5, lineHeight: 1.95, opacity: 0.8 }}>
-                    Off-screen, I've competed in badminton at the regional level, published articles and poetry,
-                    chase fitness seriously, direct (I've directed a short film), and sing, currently fronting a
+                    Off-screen, I&apos;ve competed in badminton at the regional level, published articles and
+                    poetry, chase fitness seriously, direct (I&apos;ve directed a short film), and sing, currently
+                    fronting a
                     band, Juke.Box (
                     <a
                       href="https://www.instagram.com/juqe.box"

@@ -44,7 +44,6 @@ const C_WALL = 0x1c1219;
 const C_PURPLE = 0x6b3fa0;
 const C_GOLD = 0xd8ad5c;
 const C_BURGUNDY = 0x5e1f2b;
-const C_BRONZE = 0x9a6636;
 
 /* Where the props go. Solved against the screen's horizontal extent so none of them overlap it. */
 const PROJ = { x: 3.5, z: -1.7 };
@@ -64,9 +63,15 @@ export default function ContactRoom({ on, onScreenRect, onPick }: Props) {
   const rectRef = useRef(onScreenRect);
   const pickRef = useRef(onPick);
   const onRef = useRef(on);
-  rectRef.current = onScreenRect;
-  pickRef.current = onPick;
-  onRef.current = on;
+
+  /* Kept current in an effect, not during render. Writing to a ref while rendering is a side effect:
+     React may discard a render, and the ref would keep the value from the render that never happened.
+     No dependency array, so it re-syncs after every commit. */
+  useEffect(() => {
+    rectRef.current = onScreenRect;
+    pickRef.current = onPick;
+    onRef.current = on;
+  });
 
   useEffect(() => {
     const canvas = canvasRef.current;

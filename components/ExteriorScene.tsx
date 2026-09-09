@@ -1121,11 +1121,6 @@ export default function ExteriorScene({ onEnter, onReady }: Props) {
     scene.add(newsstand);
 
     // ================= SEATED CHARACTER — capsule/rounded rig, drinking an energy drink =================
-    const cHair = 0x2b1a12;
-    const cSkin = 0xd9a878;
-    const cShirt = 0x16161c;
-    const cPants = 0x0d0d10;
-    const cShoe = 0xc98b4a;
 
     const benchGroup = new THREE.Group();
     benchGroup.position.set(3.2, 0, 2.2);
@@ -1361,8 +1356,6 @@ export default function ExteriorScene({ onEnter, onReady }: Props) {
     scene.add(character);
 
     // sit pose driven on the shared rig's own joints — thighs forward, shins back down
-    const hip = seated.hip;
-    const torsoGroup = seated.torsoGroup;
     [seated.legL, seated.legR].forEach((leg) => {
       leg.pivot.rotation.x = -1.35;
       leg.knee.rotation.x = 1.35;

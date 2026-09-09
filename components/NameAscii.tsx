@@ -76,7 +76,13 @@ type Cell = { hx: number; hy: number; x: number; y: number; ch: string };
 export default function NameAscii({ name, active = true }: { name: string; active?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const activeRef = useRef(active);
-  activeRef.current = active;
+
+  /* Kept current in an effect, not during render. Writing to a ref while rendering is a side effect:
+     React may discard a render, and the ref would keep the value from the render that never happened.
+     No dependency array, so it re-syncs after every commit. */
+  useEffect(() => {
+    activeRef.current = active;
+  });
 
   useEffect(() => {
     const canvas = canvasRef.current;

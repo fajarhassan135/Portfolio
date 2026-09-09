@@ -93,12 +93,19 @@ export default function LoadingScreen({ ready, onDone }: Props) {
   // shown the scene a moment before it has finished settling, which is the deliberate trade for
   // never sitting on the loader longer than 6 seconds.
   const leaveRef = useRef<() => void>(() => {});
-  leaveRef.current = () => {
+
+  /* Kept current in an effect, not during render. Writing to a ref while rendering is a side effect:
+     React may discard a render, and the ref would keep the value from the render that never happened.
+     No dependency array, so it re-syncs after every commit. */
+  const leave = () => {
     if (doneRef.current) return;
     doneRef.current = true;
     setVisible(false); // 380ms CSS fade
     timerRef.current = setTimeout(() => onDone?.(), HANDOFF_MS);
   };
+  useEffect(() => {
+    leaveRef.current = leave;
+  });
 
   // armed once, on mount, so nothing can push the deadline back
   useEffect(() => {
