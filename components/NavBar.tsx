@@ -47,7 +47,6 @@ const LINKS = [
 export default function NavBar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const inCinema = pathname === "/";
 
   // close on route change, so tapping a link inside the drawer does not leave it hanging open
   useEffect(() => {
@@ -72,18 +71,9 @@ export default function NavBar() {
   return (
     <>
       <nav className="nav-bar">
-        {/* The way out, always in the same place. Only shown once you are somewhere to leave: on the
-            cinema itself it would point at the page you are already on. */}
-        {inCinema ? (
-          <span aria-hidden="true" />
-        ) : (
-          <Link href="/" className="mono nav-exit">
-            <span className="nav-exit-mark" aria-hidden="true">
-              ←
-            </span>
-            Exit to cinema
-          </Link>
-        )}
+        {/* Nothing on the left. The way home is the first entry in the drawer, and on the projects
+            page the running order carries its own exit. */}
+        <span aria-hidden="true" />
 
         <button
           className={`nav-toggle${open ? " is-open" : ""}`}
