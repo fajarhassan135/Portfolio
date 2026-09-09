@@ -1,127 +1,126 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
+/**
+ * The one control that is on every page.
+ *
+ * Every entry carries a line saying what it is and, where it applies, which thing you click in the
+ * cinema to reach it. The 3D interior is discoverable by poking at it, which is the point of it, but
+ * poking at it should never be the ONLY way to find a section: this is the map.
+ */
 const LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
-  { href: "/projects", label: "Projects" },
-  { href: "/play", label: "Play" },
-  { href: "/contact", label: "Contact" },
+  {
+    href: "/",
+    label: "Home",
+    no: "01",
+    note: "The cinema interior. Click anything in it.",
+  },
+  {
+    href: "/about",
+    label: "About Me",
+    no: "02",
+    note: "Who I am. In the cinema: the popcorn stand.",
+  },
+  {
+    href: "/projects",
+    label: "My Projects",
+    no: "03",
+    note: "Personal work, screened. In the cinema: the big screen.",
+  },
+  {
+    href: "/projects#featured",
+    label: "Client & Company Work",
+    no: "04",
+    note: "Built for other people. In the cinema: the desk.",
+  },
+  {
+    href: "/contact",
+    label: "Get In Touch",
+    no: "05",
+    note: "Every way to reach me. In the cinema: the ticket booth.",
+  },
 ];
 
 export default function NavBar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const inCinema = pathname === "/";
+
+  // close on route change, so tapping a link inside the drawer does not leave it hanging open
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  // escape to close, and hold the page still while the drawer is up
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
 
   return (
     <>
-      <nav
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 50,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "20px 5vw",
-          pointerEvents: "none",
-        }}
-      >
-        <Link
-          href="/"
-          className="mono"
-          style={{
-            fontSize: 12,
-            letterSpacing: "0.15em",
-            textTransform: "uppercase",
-            color: "var(--purple-line)",
-            pointerEvents: "auto",
-          }}
-        >
-          Fajar Hassan
-        </Link>
+      <nav className="nav-bar">
+        {/* The way out, always in the same place. Only shown once you are somewhere to leave: on the
+            cinema itself it would point at the page you are already on. */}
+        {inCinema ? (
+          <span aria-hidden="true" />
+        ) : (
+          <Link href="/" className="mono nav-exit">
+            <span className="nav-exit-mark" aria-hidden="true">
+              ←
+            </span>
+            Exit to cinema
+          </Link>
+        )}
 
-        {/* desktop links */}
-        <div
-          className="desktop-only"
-          style={{ display: "flex", gap: 30, pointerEvents: "auto" }}
-        >
-          {LINKS.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="mono"
-              style={{
-                fontSize: 11,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                color: pathname === l.href ? "var(--burgundy)" : "var(--vellum)",
-                opacity: pathname === l.href ? 1 : 0.65,
-              }}
-            >
-              {l.label}
-            </Link>
-          ))}
-        </div>
-
-        {/* mobile hamburger */}
         <button
-          className="mobile-only"
-          onClick={() => setOpen(!open)}
-          aria-label="Toggle menu"
-          style={{
-            pointerEvents: "auto",
-            background: "none",
-            border: "1px solid var(--purple-line)",
-            color: "var(--vellum)",
-            width: 40,
-            height: 40,
-            borderRadius: 4,
-            fontSize: 18,
-          }}
+          className={`nav-toggle${open ? " is-open" : ""}`}
+          onClick={() => setOpen((o) => !o)}
+          aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
         >
-          {open ? "✕" : "☰"}
+          <span />
+          <span />
+          <span />
         </button>
       </nav>
 
-      {/* mobile full-screen menu */}
-      {open && (
-        <div
-          className="mobile-only"
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 49,
-            background: "var(--ink-navy)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 28,
-          }}
-        >
-          {LINKS.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              onClick={() => setOpen(false)}
-              style={{
-                fontFamily: "'Fraunces', serif",
-                fontSize: 28,
-                color:
-                  pathname === l.href ? "var(--burgundy)" : "var(--vellum)",
-              }}
-            >
-              {l.label}
-            </Link>
-          ))}
+      {/* dim the page behind, and let a click anywhere out there dismiss it */}
+      <div
+        className={`nav-scrim${open ? " is-open" : ""}`}
+        onClick={() => setOpen(false)}
+        aria-hidden="true"
+      />
+
+      <aside className={`nav-drawer${open ? " is-open" : ""}`} aria-hidden={!open}>
+        <div className="nav-drawer-inner">
+          <div className="mono nav-drawer-head">Menu</div>
+          <ul>
+            {LINKS.map((l, i) => (
+              <li key={l.href} style={{ transitionDelay: `${open ? 120 + i * 55 : 0}ms` }}>
+                <Link href={l.href} className={pathname === l.href ? "is-current" : undefined}>
+                  <span className="mono nav-no">{l.no}</span>
+                  <span className="nav-label">{l.label}</span>
+                  <span className="nav-note">{l.note}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <div className="mono nav-drawer-foot">Portfolio 2026</div>
         </div>
-      )}
+      </aside>
     </>
   );
 }

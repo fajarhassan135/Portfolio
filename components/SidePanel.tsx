@@ -1,9 +1,14 @@
 "use client";
 
+import Link from "next/link";
+
 type StationData = {
   eyebrow: string;
   title: string;
   body: string;
+  // when present, the panel offers a way through to the full page for this station
+  href?: string;
+  hrefLabel?: string;
 };
 
 export default function SidePanel({
@@ -56,6 +61,24 @@ export default function SidePanel({
           <p style={{ fontSize: 14, lineHeight: 1.75, opacity: 0.8 }}>
             {data.body}
           </p>
+          {data.href && (
+            <Link
+              href={data.href}
+              className="mono"
+              style={{
+                display: "inline-block",
+                marginTop: 26,
+                fontSize: 11,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "var(--purple-line)",
+                borderBottom: "1px solid rgba(107,63,160,0.5)",
+                paddingBottom: 4,
+              }}
+            >
+              {data.hrefLabel ?? "Read more"} →
+            </Link>
+          )}
         </>
       )}
     </div>

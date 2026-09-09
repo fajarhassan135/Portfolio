@@ -4,7 +4,7 @@ import { useState } from "react";
 import Scene from "@/components/Scene";
 import SidePanel from "@/components/SidePanel";
 
-type StationData = { eyebrow: string; title: string; body: string };
+type StationData = { eyebrow: string; title: string; body: string; href?: string; hrefLabel?: string };
 
 export default function Play() {
   const [panel, setPanel] = useState<StationData | null>(null);

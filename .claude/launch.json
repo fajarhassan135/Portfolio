@@ -1,0 +1,67 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "portfolio-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "smokify-demo",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/USER/Documents/Fajars projects/For Clients/Smokify Demo/serve.js"
+      ],
+      "port": 5599
+    },
+    {
+      "name": "nuvia",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/USER/Documents/Fajars projects/Deployed projects/NUVIA/serve.js"
+      ],
+      "port": 4173
+    },
+    {
+      "name": "smartprep-dev",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/USER/Documents/Fajars projects/Deployed projects/SmartPrepAi/smartprep-ai/node_modules/next/dist/bin/next",
+        "dev",
+        "C:/Users/USER/Documents/Fajars projects/Deployed projects/SmartPrepAi/smartprep-ai",
+        "-p",
+        "3001"
+      ],
+      "port": 3001
+    },
+    {
+      "name": "kinema-dev",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/USER/Documents/Fajars projects/Deployed projects/kinema/kinema/node_modules/next/dist/bin/next",
+        "dev",
+        "C:/Users/USER/Documents/Fajars projects/Deployed projects/kinema/kinema",
+        "-p",
+        "3002"
+      ],
+      "port": 3002
+    },
+    {
+      "name": "analyzer-dev",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:/Users/USER/Documents/Fajars projects/INTERNSHIP PROJECTS/customer-response-analyzer/node_modules/next/dist/bin/next",
+        "dev",
+        "C:/Users/USER/Documents/Fajars projects/INTERNSHIP PROJECTS/customer-response-analyzer",
+        "-p",
+        "3210"
+      ],
+      "port": 3210
+    }
+  ]
+}
